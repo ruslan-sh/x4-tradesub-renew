@@ -1,10 +1,5 @@
 # Trade Subscription Renew
 
-## AI assistance disclosure
-
-This mod was developed with substantial assistance from generative AI. The mod
-author directed the work and remains responsible for the published result.
-
 ## About the mod
 
 Trade Subscription Renew adds two default ship behaviors to X4: Foundations 9.00.
@@ -23,6 +18,14 @@ blacklists. They clear the current sector first, then prefer the smallest gate
 distance and use physical distance as a tiebreaker. Successful stale refreshes
 create a General logbook entry. Successful travel and station visits award a
 small amount of Piloting and Morale experience.
+
+- [GitHub](https://github.com/ruslan-sh/x4-tradesub-renew)
+- [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3789049684)
+
+## AI assistance disclosure
+
+This mod was developed with substantial assistance from generative AI. The mod
+author directed the work and remains responsible for the published result.
 
 ## Installation
 
@@ -282,3 +285,11 @@ For runtime testing, start X4 with:
 ```
 
 Then test both behaviors in game and inspect `debuglog.txt` for script errors.
+
+## License
+
+The original source code and documentation in this repository use the
+[MIT License](LICENSE).
+
+X4: Foundations, its trademarks, and its game assets belong to Egosoft GmbH.
+The MIT License does not cover them.
