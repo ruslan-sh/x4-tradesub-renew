@@ -13,7 +13,7 @@ non-permanent subscriptions when no stale station remains.
 **TradeSub Renew - Global** requires a four-star pilot. It searches without a
 range limit and can return to an optional parking sector.
 
-Both behaviors respect the player's civilian sector-travel and sector-activity
+Both behaviors respect the ship's civilian sector-travel and sector-activity
 blacklists. They clear the current sector first, then prefer the smallest gate
 distance and use physical distance as a tiebreaker. Successful stale refreshes
 create a General logbook entry. Successful travel and station visits award a
@@ -34,7 +34,11 @@ menu and restart the game.
 
 ### Steam Workshop
 
-Coming soon. The mod has not been published to Steam Workshop yet.
+1. Open the [Trade Subscription Renew Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3789049684).
+2. Select **Subscribe**. Steam downloads and installs the extension.
+3. Start X4 and open **Extensions** from the main menu.
+4. Enable **Trade Subscription Renew** if it is not already enabled.
+5. Restart X4 when prompted.
 
 ### Manual installation from a GitHub release
 
@@ -216,6 +220,14 @@ Convert `README.md` to Steam formatting with:
 The command writes `dist/README.steam.txt`. It converts headings, emphasis,
 links, lists, quotes, horizontal rules, and code to the tags that Steam
 supports. It does not upload or change a Workshop item.
+
+You can also use the converter directly with other Markdown files:
+
+```powershell
+.\convert-markdown-to-steam.ps1 -InputPath <markdown-file> -OutputPath <steam-file>
+```
+
+The converter creates the output directory if it does not exist.
 
 ### Publish to Steam Workshop
 

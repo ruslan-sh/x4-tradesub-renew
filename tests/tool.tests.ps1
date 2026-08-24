@@ -112,7 +112,16 @@ $testRoot = Join-Path ([IO.Path]::GetTempPath()) ("x4-tool-test-" + [guid]::NewG
 
 try {
     New-Item -ItemType Directory -Path $testRoot | Out-Null
+    $converter = Join-Path $repositoryRoot 'convert-markdown-to-steam.ps1'
+    $standaloneInput = Join-Path $testRoot 'notes.md'
+    $standaloneOutput = Join-Path $testRoot 'generated\notes.steam.txt'
+    Set-Content -LiteralPath $standaloneInput -Value "# Notes`n`nUse **carefully**."
+    & $converter -InputPath $standaloneInput -OutputPath $standaloneOutput
+    $standaloneText = (Get-Content -LiteralPath $standaloneOutput -Raw) -replace "`r`n", "`n"
+    Assert-True ($standaloneText.TrimEnd() -eq "[h1]Notes[/h1]`n`nUse [b]carefully[/b].") 'The standalone converter must read and write the supplied paths.'
+
     Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tool.ps1') -Destination $testRoot
+    Copy-Item -LiteralPath $converter -Destination $testRoot
     Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tools-config.ps1') -Destination $testRoot
     Copy-Item -LiteralPath (Join-Path $repositoryRoot 'install.ps1') -Destination $testRoot
     New-TestMod -Root $testRoot
