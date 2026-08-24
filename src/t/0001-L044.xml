@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<language>
+  <page id="989831" title="Trade Subscription Renew" descr="Trade Subscription Renew text" voice="no">
+    <t id="1">TradeSub Renew - Global</t>
+    <t id="2">Refresh stale trade information without a range limit. Requires a four-star pilot.</t>
+    <t id="3">Idle retry time</t>
+    <t id="4">Refresh Trade Information</t>
+    <t id="5">Fly to a station and refresh its trade information.</t>
+    <t id="6">Travel to TradeSub Renew Sector</t>
+    <t id="7">Travel to a sector containing stations with stale trade information.</t>
+    <t id="10">TradeSub Renew</t>
+    <t id="11">Refresh stale trade information within a configurable gate-jump limit based on pilot skill. Requires a one-star pilot.</t>
+    <t id="12">Maximum gate jumps</t>
+    <t id="13">Proactive refresh</t>
+    <t id="14">Parking sector</t>
+    <t id="15">Trade Subscription Updated</t>
+    <t id="16">%1 (%2) refreshed stale trade information for %3 (%4).</t>
+    <t id="17">Parking sector (optional)</t>
+    <t id="18">&#160;</t>
+  </page>
+</language>

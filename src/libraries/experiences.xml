@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<experiences>
+  <experience id="tradesub_renew">
+    <skill ref="piloting">
+      <individual base="0.12" falloff="0.90" limit="12"/>
+    </skill>
+    <skill ref="morale">
+      <individual base="0.12" falloff="0.90" limit="12"/>
+    </skill>
+  </experience>
+  <experience id="tradesub_renew_global">
+    <skill ref="piloting">
+      <individual base="0.10" falloff="0.95" limit="14"/>
+    </skill>
+    <skill ref="morale">
+      <individual base="0.10" falloff="0.95" limit="14"/>
+    </skill>
+  </experience>
+</experiences>

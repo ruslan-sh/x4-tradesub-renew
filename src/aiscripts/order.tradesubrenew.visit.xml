@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aiscript name="order.tradesubrenew.visit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="aiscripts.xsd" version="1">
+  <order id="TradeSubRenewVisit" name="{989831, 4}" description="{989831, 5}" category="internal" allowinloop="false">
+    <params>
+      <param name="station" type="internal" default="null"/>
+      <param name="forcerefresh" type="internal" default="false"/>
+      <param name="xpcategory" type="internal" default="null"/>
+      <param name="xpfactor" type="internal" default="1.0"/>
+    </params>
+    <location object="$station" condition="@$station.isoperational"/>
+  </order>
+
+  <interrupts>
+    <handler ref="SectorChangeHandler"/>
+    <handler ref="TargetInvalidHandler"/>
+    <handler ref="AttackHandler"/>
+    <handler ref="MissileLockHandler"/>
+    <handler ref="ScannedHandler"/>
+    <handler ref="InspectedHandler"/>
+    <handler ref="FoundAbandonedHandler"/>
+    <handler ref="FoundLockboxHandler"/>
+    <handler ref="ResupplyHandler"/>
+  </interrupts>
+
+  <attention min="unknown">
+    <actions>
+      <set_command command="command.investigate" param="$station"/>
+      <set_command_action commandaction="commandaction.flyingto" param="$station"/>
+
+      <run_script name="'move.generic'" result="$movesuccess">
+        <param name="destination" value="$station"/>
+        <param name="endintargetzone" value="true"/>
+        <param name="strictblacklist" value="true"/>
+        <param name="useknownpath" value="true"/>
+      </run_script>
+
+      <do_if value="not $movesuccess">
+        <do_if value="@this.assignedcontrolled.order.isrunning">
+          <set_order_failed order="this.assignedcontrolled.order" text="{1045, 101}"/>
+        </do_if>
+        <return/>
+      </do_if>
+
+      <set_command_action commandaction="commandaction.investigating" param="$station"/>
+      <do_if value="$forcerefresh and $station.isoperational">
+        <move_to object="this.assignedcontrolled" destination="$station" finishonapproach="true"/>
+      </do_if>
+      <do_while value="$station.isoperational and not $station.hastradesubscription">
+        <move_to object="this.assignedcontrolled" destination="$station" finishonapproach="true">
+          <interrupt_after_time time="10s"/>
+        </move_to>
+      </do_while>
+
+      <do_if value="$station.isoperational and $station.hastradesubscription and not $station.haspermanenttradesubscription">
+        <do_if value="not global.$TradeSubRenewLastVisit?">
+          <set_value name="global.$TradeSubRenewLastVisit" exact="table[]"/>
+        </do_if>
+        <set_value name="global.$TradeSubRenewLastVisit.{$station}" exact="player.age"/>
+      </do_if>
+
+      <!-- Normal visits are created only for stations selected from the stale
+           list. Proactive visits set forcerefresh and do not create a log. -->
+      <do_if value="not $forcerefresh and $station.isoperational and $station.hastradesubscription">
+        <write_to_logbook category="general" title="{989831, 15}" text="{989831, 16}.[this.assignedcontrolled.knownname, this.assignedcontrolled.idcode, $station.knownname, $station.idcode]" interaction="showonmap" object="$station"/>
+      </do_if>
+
+      <do_if value="$station.isoperational and $station.hastradesubscription and $xpcategory">
+        <apply_experience entity="this" experience="$xpcategory" factor="$xpfactor"/>
+      </do_if>
+    </actions>
+  </attention>
+</aiscript>

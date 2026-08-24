@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aiscript name="order.tradesubrenew.sector" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="aiscripts.xsd" version="1">
+  <order id="TradeSubRenewSector" name="{989831, 6}" description="{989831, 7}" category="internal" allowinloop="false">
+    <params>
+      <param name="sector" type="internal" default="null"/>
+      <param name="routeanchor" type="internal" default="null"/>
+      <param name="xpcategory" type="internal" default="null"/>
+      <param name="xpfactor" type="internal" default="1.0"/>
+    </params>
+    <location object="$sector" condition="@$sector.isclass.sector"/>
+  </order>
+
+  <interrupts>
+    <handler ref="SectorChangeHandler"/>
+    <handler ref="TargetInvalidHandler"/>
+    <handler ref="AttackHandler"/>
+    <handler ref="MissileLockHandler"/>
+    <handler ref="ScannedHandler"/>
+    <handler ref="InspectedHandler"/>
+    <handler ref="FoundAbandonedHandler"/>
+    <handler ref="FoundLockboxHandler"/>
+    <handler ref="ResupplyHandler"/>
+  </interrupts>
+
+  <attention min="unknown">
+    <actions>
+      <set_command command="command.movetozone" param="$sector"/>
+      <set_command_action commandaction="commandaction.flyingto" param="$sector"/>
+
+      <run_script name="'move.generic'" result="$movesuccess">
+        <param name="destination" value="if $routeanchor then $routeanchor else $sector"/>
+        <param name="position" value="if $routeanchor then null else $sector.coreposition"/>
+        <param name="endintargetsector" value="if $routeanchor then true else false"/>
+        <param name="strictblacklist" value="true"/>
+        <param name="useknownpath" value="true"/>
+      </run_script>
+
+      <!-- An anchored move is successful only after the ship actually enters
+           the requested sector. The parent performs station selection next. -->
+      <do_if value="$movesuccess and $routeanchor and @this.assignedcontrolled.sector != $sector">
+        <set_value name="$movesuccess" exact="false"/>
+      </do_if>
+
+      <do_if value="not $movesuccess and @this.assignedcontrolled.order.isrunning">
+        <set_order_failed order="this.assignedcontrolled.order" text="{1045, 101}"/>
+      </do_if>
+      <do_elseif value="$movesuccess and $xpcategory">
+        <apply_experience entity="this" experience="$xpcategory" factor="$xpfactor"/>
+      </do_elseif>
+    </actions>
+  </attention>
+</aiscript>

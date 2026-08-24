@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aiscript name="lib.tradesubrenew.routine" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="aiscripts.xsd" version="1">
+  <params>
+    <param name="idletime" default="5min"/>
+    <param name="maxrange" default="null"/>
+    <param name="useparking" default="false"/>
+    <param name="parkingsector" default="null"/>
+    <param name="proactive" default="false"/>
+    <param name="xpcategory" default="null"/>
+    <param name="xpfactor" default="1.0"/>
+  </params>
+  <attention min="unknown">
+    <actions>
+      <set_value name="$ship" exact="this.assignedcontrolled"/>
+      <set_value name="$blacklistgroup" exact="blacklistgroup.civilian"/>
+      <set_value name="$forcerefresh" exact="false"/>
+      <label name="findstation"/>
+      <do_if value="not $ship.sector">
+        <wait exact="1s"/>
+        <resume label="findstation"/>
+      </do_if>
+      <find_object name="$localstations" space="$ship.sector" class="class.station" multiple="true" checkoperational="true" unit="false">
+        <match knownto="$ship.owner"/>
+        <match tradesknownto="$ship.owner" negate="true"/>
+        <match_use_blacklist object="$ship" type="blacklisttype.sectortravel" group="$blacklistgroup"/>
+        <match_use_blacklist object="$ship" type="blacklisttype.sectoractivity" group="$blacklistgroup"/>
+      </find_object>
+      <do_for_each name="$localstation" in="$localstations" reverse="true">
+        <do_if value="$localstation.iswreck or $localstation.isconstruction or $localstation.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $localstation.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship}">
+          <remove_from_list name="$localstations" exact="$localstation"/>
+        </do_if>
+      </do_for_each>
+      <do_if value="$localstations.count">
+        <sort_list list="$localstations" sortbyvalue="loop.element.distanceto.{$ship}"/>
+        <set_value name="$station" exact="$localstations.{1}"/>
+        <remove_value name="$localstations"/>
+        <resume label="visitstation"/>
+      </do_if>
+      <remove_value name="$localstations"/>
+      <do_if value="$maxrange">
+        <find_object name="$stations" space="player.galaxy" class="class.station" multiple="true" checkoperational="true" unit="false">
+          <match knownto="$ship.owner"/>
+          <match tradesknownto="$ship.owner" negate="true"/>
+          <match_gate_distance object="$ship" max="$maxrange"/>
+          <match_use_blacklist object="$ship" type="blacklisttype.sectortravel" group="$blacklistgroup"/>
+          <match_use_blacklist object="$ship" type="blacklisttype.sectoractivity" group="$blacklistgroup"/>
+        </find_object>
+      </do_if>
+      <do_else>
+        <find_object name="$stations" space="player.galaxy" class="class.station" multiple="true" checkoperational="true" unit="false">
+          <match knownto="$ship.owner"/>
+          <match tradesknownto="$ship.owner" negate="true"/>
+          <match_use_blacklist object="$ship" type="blacklisttype.sectortravel" group="$blacklistgroup"/>
+          <match_use_blacklist object="$ship" type="blacklisttype.sectoractivity" group="$blacklistgroup"/>
+        </find_object>
+      </do_else>
+      <do_for_each name="$station" in="$stations" reverse="true">
+        <do_if value="$station.iswreck or $station.isconstruction or $station.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $station.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship} or $ship.gatedistance.{$station.sector}.{$blacklistgroup}.{$ship} lt 0">
+          <remove_from_list name="$stations" exact="$station"/>
+        </do_if>
+      </do_for_each>
+      <do_if value="not $stations.count">
+        <do_if value="$useparking and $parkingsector and $ship.sector != $parkingsector">
+          <create_order object="$ship" id="'TradeSubRenewSector'" immediate="true">
+            <param name="sector" value="$parkingsector"/>
+            <param name="xpcategory" value="$xpcategory"/>
+            <param name="xpfactor" value="$xpfactor"/>
+          </create_order>
+          <wait/>
+          <resume label="findstation"/>
+        </do_if>
+        <do_if value="$proactive and $useparking and $parkingsector and $ship.sector == $parkingsector">
+          <find_object name="$proactivestations" space="player.galaxy" class="class.station" multiple="true" checkoperational="true" unit="false">
+            <match knownto="$ship.owner"/>
+            <match tradesknownto="$ship.owner"/>
+            <match_gate_distance object="$parkingsector" max="$maxrange"/>
+            <match_use_blacklist object="$ship" type="blacklisttype.sectortravel" group="$blacklistgroup"/>
+            <match_use_blacklist object="$ship" type="blacklisttype.sectoractivity" group="$blacklistgroup"/>
+          </find_object>
+          <do_for_each name="$proactivestation" in="$proactivestations" reverse="true">
+            <do_if value="$proactivestation.iswreck or $proactivestation.isconstruction or $proactivestation.haspermanenttradesubscription or $proactivestation.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $proactivestation.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship} or $parkingsector.gatedistance.{$proactivestation.sector}.{$blacklistgroup}.{$ship} lt 0">
+              <remove_from_list name="$proactivestations" exact="$proactivestation"/>
+            </do_if>
+          </do_for_each>
+          <do_if value="$proactivestations.count">
+            <sort_list list="$proactivestations" sortbyvalue="if @global.$TradeSubRenewLastVisit.{loop.element} then global.$TradeSubRenewLastVisit.{loop.element} else 0s"/>
+            <set_value name="$station" exact="$proactivestations.{1}"/>
+            <set_value name="$forcerefresh" exact="true"/>
+            <remove_value name="$proactivestations"/>
+            <resume label="visitstation"/>
+          </do_if>
+          <remove_value name="$proactivestations"/>
+        </do_if>
+        <set_command command="command.wait"/>
+        <set_command_action commandaction="commandaction.standingby"/>
+        <wait exact="$idletime"/>
+        <resume label="findstation"/>
+      </do_if>
+      <sort_list list="$stations" sortbyvalue="$ship.gatedistance.{loop.element.sector}.{$blacklistgroup}.{$ship}"/>
+      <set_value name="$nearestgatedistance" exact="$ship.gatedistance.{$stations.{1}.sector}.{$blacklistgroup}.{$ship}"/>
+      <create_list name="$neareststations"/>
+      <do_for_each name="$candidate" in="$stations">
+        <do_if value="$ship.gatedistance.{$candidate.sector}.{$blacklistgroup}.{$ship} == $nearestgatedistance">
+          <append_to_list name="$neareststations" exact="$candidate"/>
+        </do_if>
+        <do_else>
+          <break/>
+        </do_else>
+      </do_for_each>
+      <sort_list list="$neareststations" sortbyvalue="loop.element.distanceto.{$ship}"/>
+      <set_value name="$station" exact="$neareststations.{1}"/>
+      <remove_value name="$neareststations"/>
+      <remove_value name="$nearestgatedistance"/>
+      <remove_value name="$stations"/>
+      <do_if value="$station.sector != $ship.sector">
+        <create_order object="$ship" id="'TradeSubRenewSector'" immediate="true">
+          <param name="sector" value="$station.sector"/>
+          <param name="routeanchor" value="$station"/>
+          <param name="xpcategory" value="$xpcategory"/>
+          <param name="xpfactor" value="$xpfactor"/>
+        </create_order>
+        <wait/>
+        <resume label="findstation"/>
+      </do_if>
+      <label name="visitstation"/>
+      <create_order object="$ship" id="'TradeSubRenewVisit'">
+        <param name="station" value="$station"/>
+        <param name="forcerefresh" value="$forcerefresh"/>
+        <param name="xpcategory" value="$xpcategory"/>
+        <param name="xpfactor" value="$xpfactor"/>
+      </create_order>
+      <wait/>
+    </actions>
+  </attention>
+</aiscript>

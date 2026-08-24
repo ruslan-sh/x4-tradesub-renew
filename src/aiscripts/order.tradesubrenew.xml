@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aiscript name="order.tradesubrenew" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="aiscripts.xsd" version="1">
+  <order id="TradeSubRenew" name="{989831, 10}" description="{989831, 11}" category="trade" allowinloop="false" infinite="true">
+    <params>
+      <param name="idletime" type="time" default="5min" text="{989831, 3}" comment="Time to wait when no station needs an update.">
+        <input_param name="min" value="1min"/>
+        <input_param name="max" value="1h"/>
+        <input_param name="step" value="1min"/>
+      </param>
+      <param name="maxrange" type="number" default="if @this.ship.pilot.skill.piloting ge 15 then 5 else if @this.ship.pilot.skill.piloting ge 12 then 4 else if @this.ship.pilot.skill.piloting ge 9 then 3 else if @this.ship.pilot.skill.piloting ge 6 then 2 else 1" text="{989831, 12}" comment="Maximum number of gate jumps allowed by the pilot's Piloting skill.">
+        <input_param name="min" value="1"/>
+        <input_param name="max" value="if @this.ship.pilot.skill.piloting ge 15 then 5 else if @this.ship.pilot.skill.piloting ge 12 then 4 else if @this.ship.pilot.skill.piloting ge 9 then 3 else if @this.ship.pilot.skill.piloting ge 6 then 2 else 1"/>
+        <input_param name="step" value="1"/>
+      </param>
+      <param name="useparking" type="bool" default="false" text="{989831, 14}" comment="Return to a selected sector when no station needs an update."/>
+      <param name="parkingsector" type="object" default="this.ship.sector" text="{989831, 18}" comment="Sector used when Parking sector is enabled.">
+        <input_param name="class" value="class.sector"/>
+      </param>
+      <param name="proactive" type="bool" default="false" text="{989831, 13}" comment="Visit the least recently refreshed temporary subscription in the current sector instead of idling."/>
+    </params>
+    <skill min="20"/>
+    <requires>
+      <match shiptype="shiptype.lasertower" negate="true"/>
+      <match class="class.spacesuit" negate="true"/>
+    </requires>
+  </order>
+
+  <interrupts>
+    <handler ref="SectorChangeHandler"/>
+    <handler ref="TargetInvalidHandler"/>
+    <handler ref="AttackHandler"/>
+    <handler ref="MissileLockHandler"/>
+    <handler ref="ScannedHandler"/>
+    <handler ref="InspectedHandler"/>
+    <handler ref="FoundAbandonedHandler"/>
+    <handler ref="FoundLockboxHandler"/>
+    <handler ref="ResupplyHandler"/>
+  </interrupts>
+
+  <attention min="unknown">
+    <actions>
+      <set_value name="$ship" exact="this.assignedcontrolled"/>
+      <set_order_syncpoint_reached order="$ship.order"/>
+      <set_value name="$skillrange" exact="if @$ship.pilot.skill.piloting ge 15 then 5 else if @$ship.pilot.skill.piloting ge 12 then 4 else if @$ship.pilot.skill.piloting ge 9 then 3 else if @$ship.pilot.skill.piloting ge 6 then 2 else 1"/>
+      <set_value name="$effectiverange" exact="[[$maxrange, 1].max, $skillrange].min"/>
+      <run_script name="'lib.tradesubrenew.routine'">
+        <param name="idletime" value="$idletime"/>
+        <param name="maxrange" value="$effectiverange"/>
+        <param name="useparking" value="$useparking"/>
+        <param name="parkingsector" value="$parkingsector"/>
+        <param name="proactive" value="$proactive"/>
+        <param name="xpcategory" value="'tradesub_renew'"/>
+        <param name="xpfactor" value="if $ship.combinedskill ge 60 then 0.333333 else if $ship.combinedskill ge 40 then 0.666667 else 1.0"/>
+      </run_script>
+    </actions>
+  </attention>
+</aiscript>
