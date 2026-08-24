@@ -21,6 +21,7 @@ small amount of Piloting and Morale experience.
 
 - [GitHub](https://github.com/ruslan-sh/x4-tradesub-renew)
 - [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3789049684)
+- [Report an Issue](https://github.com/ruslan-sh/x4-tradesub-renew/issues)
 
 ## AI assistance disclosure
 
@@ -42,7 +43,7 @@ menu and restart the game.
 
 ### Manual installation from a GitHub release
 
-1. Download the latest release archive from the GitHub Releases page.
+1. Download the latest archive from the [GitHub Releases page](https://github.com/ruslan-sh/x4-tradesub-renew/releases).
 2. Extract the archive.
 3. Right-click `install.ps1` and select **Run with PowerShell**.
 
