@@ -205,6 +205,18 @@ tradesub_renew/
 The command replaces an existing archive for the same version. It does not
 upload the archive to GitHub.
 
+### Generate a Steam-formatted README
+
+Convert `README.md` to Steam formatting with:
+
+```powershell
+.\tool.ps1 steam-readme
+```
+
+The command writes `dist/README.steam.txt`. It converts headings, emphasis,
+links, lists, quotes, horizontal rules, and code to the tags that Steam
+supports. It does not upload or change a Workshop item.
+
 ### Publish to Steam Workshop
 
 Install X Tools through Steam and configure both `XRCatTool.exe` and
@@ -248,9 +260,8 @@ Use `-UpdateNameAndDescription` to also copy the name and description from
 .\tool.ps1 publish "Update Workshop text" -UpdateNameAndDescription
 ```
 
-Publishing is always an explicit command. Sync and package commands never
-upload files. The tool does not generate a detailed Workshop description from
-this README.
+Publishing is always an explicit command. Sync, package, and steam-readme
+commands never upload files.
 
 Official Egosoft documentation:
 

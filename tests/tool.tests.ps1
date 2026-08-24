@@ -39,6 +39,34 @@ function New-TestMod {
     Set-Content -LiteralPath (Join-Path $Root 'src\libraries\test.xml') -Value '<diff />'
     Set-Content -LiteralPath (Join-Path $Root 'src\t\test.xml') -Value '<language />'
     [IO.File]::WriteAllBytes((Join-Path $Root 'src\preview.png'), [byte[]](137, 80, 78, 71, 13, 10, 26, 10, 0))
+    Set-Content -LiteralPath (Join-Path $Root 'README.md') -Value @'
+# Test Mod
+
+Use **bold**, *italic*, `code`, and [the guide](https://example.com/guide).
+Use __more bold__, _more italic_, and ~~removed text~~.
+See the [Developer guide](#developer-guide).
+
+> Quoted **text**.
+
+---
+
+![Preview](preview.png)
+
+- First item
+- Second item
+
+1. First step
+
+   ```powershell
+   .\tool.ps1 sync
+   ```
+
+2. Second step
+
+~~~text
+tilde fence
+~~~
+'@
 }
 
 function New-FakeTools {
@@ -131,6 +159,47 @@ try {
         "XRCatToolPath=$(Join-Path $toolsRoot 'XRCatTool.ps1')"
         "WorkshopToolPath=$(Join-Path $toolsRoot 'WorkshopTool.ps1')"
     )
+
+    & $tool steam-readme
+    $steamReadmePath = Join-Path $testRoot 'dist\README.steam.txt'
+    Assert-True (Test-Path -LiteralPath $steamReadmePath -PathType Leaf) 'Steam README conversion must create dist\README.steam.txt.'
+    $steamReadme = (Get-Content -LiteralPath $steamReadmePath -Raw) -replace "`r`n", "`n"
+    $expectedSteamReadme = @'
+[h1]Test Mod[/h1]
+
+Use [b]bold[/b], [i]italic[/i], [code]code[/code], and [url=https://example.com/guide]the guide[/url].
+Use [b]more bold[/b], [i]more italic[/i], and [strike]removed text[/strike].
+See the Developer guide.
+
+[quote]Quoted [b]text[/b].[/quote]
+
+[hr][/hr]
+
+Preview
+
+[list]
+[*]First item
+[*]Second item
+[/list]
+
+[olist]
+[*]First step
+
+[code]
+.\tool.ps1 sync
+[/code]
+
+[*]Second step
+[/olist]
+
+[code]
+tilde fence
+[/code]
+'@ -replace "`r`n", "`n"
+    $conversionMessage = 'Steam README conversion must map supported Markdown to Steam formatting tags. ' +
+        'Expected: ' + (ConvertTo-Json $expectedSteamReadme.TrimEnd() -Compress) +
+        ' Actual: ' + (ConvertTo-Json $steamReadme.TrimEnd() -Compress)
+    Assert-True ($steamReadme.TrimEnd() -eq $expectedSteamReadme.TrimEnd()) $conversionMessage
 
     & $tool package
     $packageRoot = Join-Path $testRoot 'dist\tradesub_renew'
