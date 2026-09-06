@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<content id="ws_3789049684" name="Trade Subscription Renew" description="Adds default ship behaviors that renew stale trade subscriptions." author="ruslan-sh" version="101" date="2026-08-23" save="0" sync="false" lastupdate="1787530152">
+<content id="ws_3789049684" name="Trade Subscription Renew" description="Adds default ship behaviors that renew stale trade subscriptions." author="ruslan-sh" version="102" date="2026-09-05" save="0" sync="false" lastupdate="1788666473">
   <text language="44" name="Trade Subscription Renew" description="Adds default ship behaviors that renew stale trade subscriptions."/>
 </content>

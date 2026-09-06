@@ -1,0 +1,11 @@
+Trade Subscription Renew - Changelog
+
+Version 1.02 - 2026-09-05
+
+- Exclude stations that would attack the assigned ship.
+- Select randomly between sectors at the same shortest gate distance.
+- Reduce the Piloting and Morale experience rates.
+
+Version 1.01 - 2026-08-23
+
+- Initial release.

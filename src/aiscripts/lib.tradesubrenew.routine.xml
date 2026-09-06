@@ -26,7 +26,7 @@
         <match_use_blacklist object="$ship" type="blacklisttype.sectoractivity" group="$blacklistgroup"/>
       </find_object>
       <do_for_each name="$localstation" in="$localstations" reverse="true">
-        <do_if value="$localstation.iswreck or $localstation.isconstruction or $localstation.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $localstation.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship}">
+        <do_if value="$localstation.iswreck or $localstation.isconstruction or $localstation.mayattack.{$ship} or $localstation.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $localstation.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship}">
           <remove_from_list name="$localstations" exact="$localstation"/>
         </do_if>
       </do_for_each>
@@ -55,7 +55,7 @@
         </find_object>
       </do_else>
       <do_for_each name="$station" in="$stations" reverse="true">
-        <do_if value="$station.iswreck or $station.isconstruction or $station.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $station.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship} or $ship.gatedistance.{$station.sector}.{$blacklistgroup}.{$ship} lt 0">
+        <do_if value="$station.iswreck or $station.isconstruction or $station.mayattack.{$ship} or $station.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $station.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship} or $ship.gatedistance.{$station.sector}.{$blacklistgroup}.{$ship} lt 0">
           <remove_from_list name="$stations" exact="$station"/>
         </do_if>
       </do_for_each>
@@ -78,7 +78,7 @@
             <match_use_blacklist object="$ship" type="blacklisttype.sectoractivity" group="$blacklistgroup"/>
           </find_object>
           <do_for_each name="$proactivestation" in="$proactivestations" reverse="true">
-            <do_if value="$proactivestation.iswreck or $proactivestation.isconstruction or $proactivestation.haspermanenttradesubscription or $proactivestation.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $proactivestation.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship} or $parkingsector.gatedistance.{$proactivestation.sector}.{$blacklistgroup}.{$ship} lt 0">
+            <do_if value="$proactivestation.iswreck or $proactivestation.isconstruction or $proactivestation.haspermanenttradesubscription or $proactivestation.mayattack.{$ship} or $proactivestation.sector.isblacklisted.{blacklisttype.sectortravel}.{$blacklistgroup}.{$ship} or $proactivestation.sector.isblacklisted.{blacklisttype.sectoractivity}.{$blacklistgroup}.{$ship} or $parkingsector.gatedistance.{$proactivestation.sector}.{$blacklistgroup}.{$ship} lt 0">
               <remove_from_list name="$proactivestations" exact="$proactivestation"/>
             </do_if>
           </do_for_each>
@@ -99,16 +99,27 @@
       <sort_list list="$stations" sortbyvalue="$ship.gatedistance.{loop.element.sector}.{$blacklistgroup}.{$ship}"/>
       <set_value name="$nearestgatedistance" exact="$ship.gatedistance.{$stations.{1}.sector}.{$blacklistgroup}.{$ship}"/>
       <create_list name="$neareststations"/>
+      <create_list name="$nearestsectors"/>
       <do_for_each name="$candidate" in="$stations">
         <do_if value="$ship.gatedistance.{$candidate.sector}.{$blacklistgroup}.{$ship} == $nearestgatedistance">
           <append_to_list name="$neareststations" exact="$candidate"/>
+          <do_if value="not $nearestsectors.indexof.{$candidate.sector}">
+            <append_to_list name="$nearestsectors" exact="$candidate.sector"/>
+          </do_if>
         </do_if>
         <do_else>
           <break/>
         </do_else>
       </do_for_each>
-      <sort_list list="$neareststations" sortbyvalue="loop.element.distanceto.{$ship}"/>
+      <set_value name="$targetsector" exact="$nearestsectors.random"/>
+      <do_for_each name="$candidate" in="$neareststations" reverse="true">
+        <do_if value="$candidate.sector != $targetsector">
+          <remove_from_list name="$neareststations" exact="$candidate"/>
+        </do_if>
+      </do_for_each>
       <set_value name="$station" exact="$neareststations.{1}"/>
+      <remove_value name="$targetsector"/>
+      <remove_value name="$nearestsectors"/>
       <remove_value name="$neareststations"/>
       <remove_value name="$nearestgatedistance"/>
       <remove_value name="$stations"/>
